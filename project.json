@@ -1,0 +1,273 @@
+{
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+    "data": {
+      "url": "https://raw.githubusercontent.com/parthmodi444/Information-visualisation/refs/heads/main/final5_olympics.csv"
+    },
+    "transform": [
+      {
+        "filter": "datum.height > 0 && datum.weight > 0 && datum.age > 0"
+      },
+      {
+        "calculate": "datum.height / 100",
+        "as": "height_in_meters"
+      },
+      {
+        "calculate": "datum.weight / (datum.height_in_meters * datum.height_in_meters)",
+        "as": "bmi"
+      },
+      {
+        "calculate": "datum.age >= 18 ? 'Adult' : 'Minor'",
+        "as": "age_group"
+      }
+    ],
+      "title": {
+      "text": "Olympic Games Dashboard: Trends and Achievements",
+      "anchor": "middle",
+      "fontSize": 30,
+      "offset": 20
+    },
+    "vconcat": [
+      {
+        "hconcat": [
+          {
+            "width": 500,
+            "height": 500,
+            "mark": "point",
+            "transform": [
+  
+              { "filter": { "param": "legend_selection" } },
+  
+              { "filter": { "param": "age_selection" } },
+  
+              { "filter": { "param": "year_selection" } },
+  
+              { "filter": { "param": "country_selection" } }
+  
+            ],
+            "params": [
+              {
+                "name": "scatter_selection",
+                "select": { "type": "interval", "encodings": ["x", "y"] }
+              },
+              {
+                "name": "legend_selection",
+                "select": { "type": "point", "fields": ["medal"] },
+                "bind": "legend"
+              },
+              {
+                "name": "age_selection",
+                "select": { "type": "point", "fields": ["age_group"] },
+                "bind": "legend"
+              },
+              {
+                "name": "medal_type_selection",
+                "select": {
+                  "type": "point",
+                  "fields": ["medal"]
+                },
+                "bind": "legend"
+              },
+              {
+                "name": "year_selection",
+                "select": {
+                  "type": "point",
+                  "fields": ["year"]
+                }
+              },
+              {
+                "name": "country_selection",
+                "select": {
+                  "type": "point",
+                  "fields": ["country"]
+                }
+              }
+            ],
+            "encoding": {
+              "x": {
+                "field": "bmi",
+                "type": "quantitative",
+                "title": "BMI",
+                "scale": {
+                  "domain": [0, 70]
+                }
+              },
+              "y": {
+                "field": "age",
+                "type": "quantitative",
+                "title": "Age",
+                "scale": {
+                  "domain": [0, 70]
+                }
+              },
+              "color": {
+                "condition": {
+                  "param": "medal_type_selection",
+                  "field": "medal",
+                  "type": "nominal",
+                  "title": "Medal",
+                  "scale": {
+                    "domain": ["Gold", "Silver", "Bronze"],
+                    "range": ["#FFD700", "#A6A6A6", "#CD7F32"] 
+                  }
+                },
+                "value": "black"
+              },
+              "shape": {
+                "condition": {
+                  "param": "age_selection",
+                  "field": "age_group",
+                  "type": "nominal",
+                  "title": "Age Group",
+                  "scale": {
+                    "domain": ["Adult", "Minor"],
+                    "range": ["circle", "square"]
+                  }
+                },
+                "value": "circle"
+              },
+              "tooltip": [
+                { "field": "name", "type": "nominal", "title": "Athlete" },
+                { "field": "bmi", "type": "quantitative", "title": "BMI" },
+                { "field": "age", "type": "quantitative", "title": "Age" },
+                { "field": "sex", "type": "nominal", "title": "Gender" },
+                { "field": "team", "type": "nominal", "title": "Team" },
+                { "field": "sport", "type": "nominal", "title": "Sport" }
+              ]
+            }
+          },
+          {
+            "width": 200,
+            "height": 500,
+            "params": [
+              {
+                "name": "country_selection",
+                "select": {
+                  "type": "point",
+                  "fields": ["country"],
+                  "encodings": ["y"]
+                }
+              }
+            ],
+            "transform": [
+              { "filter": { "param": "legend_selection" } },
+              { "filter": { "param": "age_selection" } },
+              { "filter": { "param": "scatter_selection" } },
+              { "filter": { "param": "year_selection" } },
+              { "filter": { "param": "medal_type_selection" } },
+              {
+                "aggregate": [
+                  {
+                    "op": "count",
+                    "field": "medal",
+                    "as": "total_medals"
+                  }
+                ],
+                "groupby": ["country","medal"]
+              },
+  
+            
+              {
+                "window": [
+                  {
+                    "op": "rank",
+                    "as": "rank"
+                  }
+                ],
+                "sort": [{ "field": "total_medals", "order": "descending" }]
+              }          ],
+            "mark": "bar",
+            "encoding": {
+              "x": { "field": "total_medals", "type": "quantitative", "title": "Medals" },
+              "y": {
+                "field": "country",
+                "type": "ordinal",
+                "sort": "-x"
+              },
+              "color": {
+                "condition": {
+                  "param": "country_selection",
+                  "field": "medal",
+                  "type": "nominal"
+                },
+                "value": "lightgrey"
+              },
+              "opacity": {
+                "condition": { "param": "country_selection", "value": 1 },
+                "value": 0.5
+              }
+            }
+          }
+        ]
+      },
+      {
+        "hconcat": [
+          {
+            "width": 700,
+            "height": 100,
+            "transform": [
+              { "filter": { "param": "legend_selection" } },
+              { "filter": { "param": "age_selection" } },
+              { "filter": { "param": "scatter_selection" } },
+              { "filter": { "param": "country_selection" } },
+              { "filter": { "param": "medal_type_selection" } }
+            ],
+            "layer": [
+              {
+                "params": [
+                  {
+                    "name": "year_selection",
+                    "select": {
+                      "type": "point",
+                      "encodings": ["x"],
+                      "fields": ["year"]
+                    }
+                  }
+                ],
+                "mark": "bar"
+              }
+            ],
+            "encoding": {
+              "x": {
+                "field": "year",
+                "title": "Year",
+                 "axis": {
+        "labelAngle": 0
+      }
+              },
+              "y": {
+                "aggregate": "count",
+                "title": "Total Games"
+              },
+              "color": {
+                "condition": {
+                  "param": "year_selection",
+                  "field": "medal",
+                  "type": "nominal"
+                },
+                "value": "lightgrey"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "config": {
+      "legend": {
+        "orient": "right",
+        "titleFontSize": 16,
+        "labelFontSize": 16
+      },
+      "axis": {
+        "titleFontSize": 20,
+        "titlePadding": 10,
+        "labelFontSize": 16,
+        "labelPadding": 10
+      },
+      "title": {
+        "fontSize": 24,
+        "anchor": "start",
+        "subtitleFontSize": 18,
+        "subtitlePadding":10
+  }
+  }
+  }
