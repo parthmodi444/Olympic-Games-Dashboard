@@ -73,17 +73,6 @@ To use or modify this dashboard, you need:
 3. Click **Run** to render the dashboard.
 
 Alternatively, you can embed the JSON specification in a web application or use it with a Vega-Lite-compatible library.
-
----
-
-## Screenshots
-(Add screenshots of the dashboard here if available.)
-
----
-
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ---
 
 ## Acknowledgments
